@@ -23,18 +23,11 @@
           padding-top: 56px;
         }
       }
-      @font-face {
-        font-family: "wakanda";
-        src:url("wakandaforever-regular.ttf");
-      }
       canvas {
         border: 1px black solid;
       }
       #textCanvas{
         display: none;
-      }
-      .wakanda {
-        font-family: "wakanda"
       }
     </style>
 
@@ -49,21 +42,18 @@
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarResponsive" style="font-family: wakanda">
+        <div class="collapse navbar-collapse wakanda" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item active">
-              <a class="nav-link" href="#">Home
+              <a class="nav-link" href="/">Home
                 <span class="sr-only">(current)</span>
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">About</a>
+              <a class="nav-link" href="https://github.com/hitamu/wakanda">Github</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Services</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Contact</a>
+              <a class="nav-link" href="https://facebook.com/hitamu">Contact</a>
             </li>
           </ul>
         </div>
@@ -76,8 +66,8 @@
         <div class="col-lg-12 text-center">
           <h1 class="mt-5 wakanda">Wakanda Forever</h1>
           <br>
-          <div class="row col-md-8 offset-md-2 text-center">
-            <div class="col-md-10">
+          <div class="row col-md-10 offset-md-1 text-center">
+            <div class="col-md-8">
               <input 
                 id="text"
                 type="text" 
@@ -89,6 +79,9 @@
                 <button class="btn btn-lg btn-primary">Download</button>
               </a>
             </div>
+            <div class="col-md-2">
+              <button class="btn btn-lg btn-success" id="changeStyle">Change Style</button>
+            </div>
           </div>
           <br>
           <canvas id='textCanvas' height=140></canvas>
@@ -99,22 +92,55 @@
 
   </body>
   <script type="text/javascript">
+    var url = new URL(window.location.href);
+    var style = url.searchParams.get("style");
+    if (!style || style > 4) {
+      style = 1;
+    }
+    var fontStyle = 'wakanda' + style;
+    var newStyle = document.createElement('style');
+    newStyle.appendChild(document.createTextNode("\
+      @font-face {\
+          font-family: " + fontStyle + ";\
+          src: url('" + fontStyle + ".ttf') ;\
+      }\
+      .wakanda {\
+        font-family: "+ fontStyle +"\
+      }\
+    "));
+
+    document.head.appendChild(newStyle);
+
     (function() {
+      var url = new URL(window.location.href);
+      var style = url.searchParams.get("style");
       var tCtx = document.getElementById('textCanvas').getContext('2d');
       var imageElem = document.getElementById('image');
 
       document.getElementById('text').addEventListener('keyup', function (){
+        var fontStyle = style ? style : 1;
         tCtx.canvas.width = tCtx.measureText(this.value).width;
-        tCtx.font="100px wakanda";
+        tCtx.font="100px wakanda" + fontStyle;
         tCtx.fillText(this.value, 0, 100);
         imageElem.src = tCtx.canvas.toDataURL();
       }, false);
 
-      function dlCanvas() {
-          var dt = document.getElementById('textCanvas').toDataURL('image/png');
-          this.href = dt;
-      };
-      dl.addEventListener('click', dlCanvas, false);
+      document.getElementById('changeStyle').addEventListener('click', function(){
+        var value = document.getElementById('text').value;
+        if (!style) {
+          window.location.href = window.location.href + '?style=1';
+        } else if (parseInt(style) >= 4) {
+          window.location.href = window.location.href.replace(style, 1);
+        } else {
+          var next = parseInt(style) + 1;
+          window.location.href = window.location.href.replace(style, next);
+        }
+      }, false);
+
+      dl.addEventListener('click', function() {
+        var dt = document.getElementById('textCanvas').toDataURL('image/png');
+        this.href = dt;
+      }, false);
     })();
   </script>
 
